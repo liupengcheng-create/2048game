@@ -1,0 +1,119 @@
+# 2048 Game - Git Ignore File
+# 专为纯前端HTML/CSS/JavaScript项目设计
+
+# ===========================================
+# 操作系统生成的文件
+# ===========================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===========================================
+# 编辑器和IDE
+# ===========================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs (WebStorm, IntelliJ等)
+.idea/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# 其他编辑器临时文件
+*.swp
+*.swo
+*~
+
+# ===========================================
+# 开发工具和依赖（如果将来添加）
+# ===========================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+package-lock.json
+yarn.lock
+
+# ===========================================
+# 临时文件和日志
+# ===========================================
+
+# 日志文件
+*.log
+error.log
+debug.log
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ===========================================
+# 浏览器和本地服务器
+# ===========================================
+
+# 浏览器缓存
+.cache/
+
+# ===========================================
+# 项目特定文件
+# ===========================================
+
+# Kiro文件夹 - 只保留specs目录
+.kiro/*
+!.kiro/specs/
+
+# 用户本地配置
+config/local.json
+user-settings.json
+
+# 压缩文件
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# ===========================================
+# 安全和敏感信息
+# ===========================================
+
+# 环境变量文件（如果将来使用）
+.env
+.env.local
+.env.production
+
+# ===========================================
+# 其他
+# ===========================================
+
+# 本地测试文件
+test-local/
+*.test.local.*
+
+# 用户自定义文件
+.gitignore.local
+notes.txt
+TODO.local.md
