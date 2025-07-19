@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048游戏 - 错误处理测试</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .error-test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .test-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-button {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .test-button:hover {
+            background: #9f8a76;
+        }
+        
+        .test-button.danger {
+            background: #e74c3c;
+        }
+        
+        .test-button.danger:hover {
+            background: #c0392b;
+        }
+        
+        .test-output {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .error-log {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .error-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .error-type {
+            font-weight: bold;
+            color: #e53e3e;
+            margin-bottom: 5px;
+        }
+        
+        .error-details {
+            font-size: 12px;
+            color: #4a5568;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8f7a66;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #776e65;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-test-container">
+        <h1>2048游戏 - 错误处理测试</h1>
+        
+        <div class="test-section">
+            <h2>系统状态</h2>
+            <div class="stats-grid" id="stats-grid">
+                <!-- 统计信息将在这里显示 -->
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>边界条件测试</h2>
+            <div class="test-controls">
+                <button class="test-button" onclick="testInvalidGrid()">无效网格测试</button>
+                <button class="test-button" onclick="testInvalidScore()">无效分数测试</button>
+                <button class="test-button" onclick="testMemoryLeak()">内存泄漏测试</button>
+                <button class="test-button" onclick="testLargeNumbers()">大数值测试</button>
+                <button class="test-button" onclick="testRapidOperations()">快速操作测试</button>
+                <button class="test-button" onclick="testStorageLimit()">存储限制测试</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>错误模拟测试</h2>
+            <div class="test-controls">
+                <button class="test-button danger" onclick="simulateJSError()">JavaScript错误</button>
+                <button class="test-button danger" onclick="simulateRenderError()">渲染错误</button>
+                <button class="test-button danger" onclick="simulateStorageError()">存储错误</button>
+                <button class="test-button danger" onclick="simulateNetworkError()">网络错误</button>
+                <button class="test-button danger" onclick="simulateMemoryError()">内存错误</button>
+                <button class="test-button danger" onclick="corruptGameState()">损坏游戏状态</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>恢复功能测试</h2>
+            <div class="test-controls">
+                <button class="test-button" onclick="testAutoRecovery()">自动恢复测试</button>
+                <button class="test-button" onclick="testStateValidation()">状态验证测试</button>
+                <button class="test-button" onclick="testErrorLogging()">错误日志测试</button>
+                <button class="test-button" onclick="clearErrorLog()">清除错误日志</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试输出</h2>
+            <div id="test-output" class="test-output">点击测试按钮开始...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>错误日志</h2>
+            <div id="error-log" class="error-log">
+                <!-- 错误日志将在这里显示 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="js/GameState.js"></script>
+    <script src="js/MoveProcessor.js"></script>
+    <script src="js/GameEngine.js"></script>
+    <script src="js/GameRenderer.js"></script>
+    <script src="js/EventHandler.js"></script>
+    <script src="js/ScoreManager.js"></script>
+    
+    <script>
+        let gameState = null;
+        let gameEngine = null;
+        let gameRenderer = null;
+        let scoreManager = null;
+        let testOutput = null;
+        let errorCount = 0;
+        let testCount = 0;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            testOutput = document.getElementById('test-output');
+            initErrorTest();
+            updateStats();
+            loadErrorLog();
+            
+            // 定期更新统计信息
+            setInterval(updateStats, 5000);
+        });
+        
+        // 初始化错误测试
+        function initErrorTest() {
+            try {
+                gameState = new GameState();
+                scoreManager = new ScoreManager();
+                gameEngine = new GameEngine(gameState, scoreManager);
+                
+                const gameContainer = document.createElement('div');
+                gameContainer.className = 'game-container';
+                gameRenderer = new GameRenderer(gameContainer);
+                
+                log('错误测试环境初始化完成');
+            } catch (error) {
+                log('错误测试环境初始化失败: ' + error.message);
+            }
+        }
+        
+        // 边界条件测试
+        function testInvalidGrid() {
+            log('开始无效网格测试...');
+            testCount++;
+            
+            try {
+                // 测试空网格
+                gameState.setGrid(null);
+                gameEngine.validateGameState();
+                
+                // 测试错误尺寸网格
+                gameState.setGrid([[1, 2], [3, 4]]);
+                gameEngine.validateGameState();
+                
+                // 测试包含无效值的网格
+                gameState.setGrid([
+                    [2, 4, -1, 8],
+                    [16, 32, 64, 128],
+                    [256, 512, 1024, 2048],
+                    [0, 0, 0, 0]
+                ]);
+                gameEngine.validateGameState();
+                
+                log('✓ 无效网格测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 无效网格测试失败: ' + error.message);
+            }
+        }
+        
+        function testInvalidScore() {
+            log('开始无效分数测试...');
+            testCount++;
+            
+            try {
+                // 测试负分数
+                gameState.setScore(-100);
+                gameEngine.validateGameState();
+                
+                // 测试极大分数
+                gameState.setScore(Number.MAX_SAFE_INTEGER + 1);
+                gameEngine.validateGameState();
+                
+                // 测试NaN分数
+                gameState.setScore(NaN);
+                gameEngine.validateGameState();
+                
+                log('✓ 无效分数测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 无效分数测试失败: ' + error.message);
+            }
+        }
+        
+        function testMemoryLeak() {
+            log('开始内存泄漏测试...');
+            testCount++;
+            
+            try {
+                const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+                
+                // 创建大量对象
+                for (let i = 0; i < 1000; i++) {
+                    const tempState = new GameState();
+                    const tempEngine = new GameEngine(tempState);
+                    // 不清理引用，模拟内存泄漏
+                }
+                
+                // 强制垃圾回收（如果支持）
+                if (window.gc) {
+                    window.gc();
+                }
+                
+                const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+                const memoryIncrease = finalMemory - initialMemory;
+                
+                log(`内存使用变化: ${(memoryIncrease / 1024 / 1024).toFixed(2)} MB`);
+                log('✓ 内存泄漏测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 内存泄漏测试失败: ' + error.message);
+            }
+        }
+        
+        function testLargeNumbers() {
+            log('开始大数值测试...');
+            testCount++;
+            
+            try {
+                // 测试极大的方块值
+                gameState.setTileValue(0, 0, 131072); // 2^17
+                gameEngine.validateGameState();
+                
+                // 测试极大的分数
+                scoreManager.setCurrentScore(999999999);
+                
+                log('✓ 大数值测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 大数值测试失败: ' + error.message);
+            }
+        }
+        
+        function testRapidOperations() {
+            log('开始快速操作测试...');
+            testCount++;
+            
+            try {
+                const startTime = performance.now();
+                
+                // 快速执行大量操作
+                for (let i = 0; i < 100; i++) {
+                    gameEngine.move('left');
+                    gameEngine.move('right');
+                    gameEngine.move('up');
+                    gameEngine.move('down');
+                }
+                
+                const endTime = performance.now();
+                log(`快速操作耗时: ${(endTime - startTime).toFixed(2)}ms`);
+                log('✓ 快速操作测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 快速操作测试失败: ' + error.message);
+            }
+        }
+        
+        function testStorageLimit() {
+            log('开始存储限制测试...');
+            testCount++;
+            
+            try {
+                // 尝试存储大量数据
+                const largeData = 'x'.repeat(1024 * 1024); // 1MB数据
+                localStorage.setItem('test_large_data', largeData);
+                localStorage.removeItem('test_large_data');
+                
+                log('✓ 存储限制测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 存储限制测试失败: ' + error.message);
+            }
+        }
+        
+        // 错误模拟测试
+        function simulateJSError() {
+            log('模拟JavaScript错误...');
+            testCount++;
+            errorCount++;
+            
+            try {
+                // 故意触发错误
+                undefined.someMethod();
+            } catch (error) {
+                log('❌ JavaScript错误已触发: ' + error.message);
+            }
+        }
+        
+        function simulateRenderError() {
+            log('模拟渲染错误...');
+            testCount++;
+            errorCount++;
+            
+            try {
+                // 传入无效参数给渲染器
+                gameRenderer.render(null);
+            } catch (error) {
+                log('❌ 渲染错误已触发: ' + error.message);
+            }
+        }
+        
+        function simulateStorageError() {
+            log('模拟存储错误...');
+            testCount++;
+            errorCount++;
+            
+            try {
+                // 尝试存储循环引用对象
+                const circularObj = {};
+                circularObj.self = circularObj;
+                localStorage.setItem('circular', JSON.stringify(circularObj));
+            } catch (error) {
+                log('❌ 存储错误已触发: ' + error.message);
+            }
+        }
+        
+        function simulateNetworkError() {
+            log('模拟网络错误...');
+            testCount++;
+            errorCount++;
+            
+            // 模拟网络请求失败
+            fetch('https://nonexistent-domain-12345.com/api')
+                .catch(error => {
+                    log('❌ 网络错误已触发: ' + error.message);
+                });
+        }
+        
+        function simulateMemoryError() {
+            log('模拟内存错误...');
+            testCount++;
+            errorCount++;
+            
+            try {
+                // 尝试创建超大数组
+                const hugeArray = new Array(999999999);
+                hugeArray.fill(0);
+            } catch (error) {
+                log('❌ 内存错误已触发: ' + error.message);
+            }
+        }
+        
+        function corruptGameState() {
+            log('损坏游戏状态...');
+            testCount++;
+            errorCount++;
+            
+            try {
+                // 故意损坏游戏状态
+                gameState.grid = "invalid";
+                gameState.score = "not a number";
+                gameEngine.validateGameState();
+            } catch (error) {
+                log('❌ 游戏状态已损坏: ' + error.message);
+            }
+        }
+        
+        // 恢复功能测试
+        function testAutoRecovery() {
+            log('测试自动恢复功能...');
+            testCount++;
+            
+            try {
+                // 损坏状态
+                gameState.setScore(-1);
+                
+                // 触发验证和自动修复
+                const isValid = gameEngine.validateGameState();
+                
+                if (gameState.getScore() >= 0) {
+                    log('✓ 自动恢复成功');
+                } else {
+                    log('❌ 自动恢复失败');
+                    errorCount++;
+                }
+            } catch (error) {
+                errorCount++;
+                log('❌ 自动恢复测试失败: ' + error.message);
+            }
+        }
+        
+        function testStateValidation() {
+            log('测试状态验证功能...');
+            testCount++;
+            
+            try {
+                const isValid = gameEngine.validateGameState();
+                log(`状态验证结果: ${isValid ? '有效' : '无效'}`);
+                log('✓ 状态验证测试完成');
+            } catch (error) {
+                errorCount++;
+                log('❌ 状态验证测试失败: ' + error.message);
+            }
+        }
+        
+        function testErrorLogging() {
+            log('测试错误日志功能...');
+            testCount++;
+            
+            try {
+                // 触发一个错误并检查是否被记录
+                const errorsBefore = getErrorLogCount();
+                
+                try {
+                    throw new Error('测试错误');
+                } catch (testError) {
+                    window.handleError && window.handleError(testError, '错误日志测试');
+                }
+                
+                setTimeout(() => {
+                    const errorsAfter = getErrorLogCount();
+                    if (errorsAfter > errorsBefore) {
+                        log('✓ 错误日志功能正常');
+                    } else {
+                        log('❌ 错误日志功能异常');
+                        errorCount++;
+                    }
+                    loadErrorLog();
+                }, 100);
+                
+            } catch (error) {
+                errorCount++;
+                log('❌ 错误日志测试失败: ' + error.message);
+            }
+        }
+        
+        function clearErrorLog() {
+            try {
+                localStorage.removeItem('2048_error_log');
+                loadErrorLog();
+                log('✓ 错误日志已清除');
+            } catch (error) {
+                log('❌ 清除错误日志失败: ' + error.message);
+            }
+        }
+        
+        // 工具函数
+        function getErrorLogCount() {
+            try {
+                const errorLog = JSON.parse(localStorage.getItem('2048_error_log') || '[]');
+                return errorLog.length;
+            } catch (error) {
+                return 0;
+            }
+        }
+        
+        function loadErrorLog() {
+            const container = document.getElementById('error-log');
+            try {
+                const errorLog = JSON.parse(localStorage.getItem('2048_error_log') || '[]');
+                
+                if (errorLog.length === 0) {
+                    container.innerHTML = '<p>暂无错误日志</p>';
+                    return;
+                }
+                
+                const errorHTML = errorLog.slice(-5).reverse().map(error => `
+                    <div class="error-item">
+                        <div class="error-type">${error.context || '未知错误'}</div>
+                        <div class="error-details">
+                            <strong>消息:</strong> ${error.message}<br>
+                            <strong>时间:</strong> ${new Date(error.timestamp).toLocaleString()}<br>
+                            <strong>URL:</strong> ${error.url}
+                        </div>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = errorHTML;
+            } catch (error) {
+                container.innerHTML = '<p>加载错误日志失败</p>';
+            }
+        }
+        
+        function updateStats() {
+            const container = document.getElementById('stats-grid');
+            const memoryInfo = performance.memory || {};
+            
+            const stats = [
+                { label: '测试次数', value: testCount },
+                { label: '错误次数', value: errorCount },
+                { label: '成功率', value: testCount > 0 ? Math.round((testCount - errorCount) / testCount * 100) + '%' : '0%' },
+                { label: '内存使用', value: memoryInfo.usedJSHeapSize ? (memoryInfo.usedJSHeapSize / 1024 / 1024).toFixed(1) + 'MB' : '未知' },
+                { label: '错误日志', value: getErrorLogCount() + '条' },
+                { label: '运行时间', value: Math.floor((Date.now() - (window.startTime || Date.now())) / 1000) + '秒' }
+            ];
+            
+            container.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+        
+        function log(message) {
+            if (testOutput) {
+                const timestamp = new Date().toLocaleTimeString();
+                testOutput.textContent += `[${timestamp}] ${message}\n`;
+                testOutput.scrollTop = testOutput.scrollHeight;
+            }
+            console.log(message);
+        }
+        
+        // 记录页面开始时间
+        window.startTime = Date.now();
+    </script>
+</body>
+</html>

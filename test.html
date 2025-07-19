@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048游戏 - 单元测试</title>
+    <style>
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: #faf8ef;
+            color: #776e65;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #776e65;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+        }
+        
+        .test-section h2 {
+            color: #8f7a66;
+            border-bottom: 2px solid #bbada0;
+            padding-bottom: 10px;
+        }
+        
+        .test-button {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            transition: background-color 0.2s;
+        }
+        
+        .test-button:hover {
+            background: #9f8a76;
+        }
+        
+        .test-output {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            max-width: 200px;
+            margin: 10px 0;
+        }
+        
+        .demo-cell {
+            background: #bbada0;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .demo-cell.empty {
+            background: rgba(238, 228, 218, 0.35);
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <h1>2048游戏 - 单元测试</h1>
+    
+    <div class="test-container">
+        <div class="test-section">
+            <h2>MoveProcessor 算法测试</h2>
+            <p>测试移动和合并算法的正确性</p>
+            <button class="test-button" onclick="runMoveProcessorTests()">运行 MoveProcessor 测试</button>
+            <div id="moveprocessor-output" class="test-output" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>GameEngine 引擎测试</h2>
+            <p>测试游戏引擎的核心功能</p>
+            <button class="test-button" onclick="runGameEngineTests()">运行 GameEngine 测试</button>
+            <div id="gameengine-output" class="test-output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>算法演示</h2>
+            <p>演示不同移动方向的效果</p>
+            <button class="test-button" onclick="demonstrateAlgorithm()">演示算法</button>
+            <div id="demo-output" class="test-output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>性能测试</h2>
+            <p>测试算法的执行性能</p>
+            <button class="test-button" onclick="runPerformanceTests()">运行性能测试</button>
+            <div id="performance-output" class="test-output" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="js/GameState.js"></script>
+    <script src="js/MoveProcessor.js"></script>
+    <script src="js/GameEngine.js"></script>
+    <script src="tests/MoveProcessor.test.js"></script>
+    <script src="tests/GameEngine.test.js"></script>
+    
+    <script>
+        // 重定向console.log到指定元素
+        function redirectConsole(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = '';
+            
+            const originalLog = console.log;
+            const originalError = console.error;
+            
+            console.log = function(...args) {
+                element.textContent += args.join(' ') + '\n';
+                originalLog.apply(console, args);
+            };
+            
+            console.error = function(...args) {
+                element.textContent += 'ERROR: ' + args.join(' ') + '\n';
+                originalError.apply(console, args);
+            };
+            
+            return function restore() {
+                console.log = originalLog;
+                console.error = originalError;
+            };
+        }
+        
+        // 运行MoveProcessor测试
+        function runMoveProcessorTests() {
+            const restore = redirectConsole('moveprocessor-output');
+            
+            try {
+                // 重新创建测试实例并运行
+                const testFramework = new TestFramework();
+                
+                // 重新定义所有测试（简化版）
+                testFramework.test('processLine - 基本滑动', () => {
+                    const result = MoveProcessor.processLine([2, 0, 2, 0]);
+                    testFramework.assertEqual(result.line, [4, 0, 0, 0]);
+                    testFramework.assertEqual(result.score, 4);
+                });
+                
+                testFramework.test('moveLeft - 基本移动', () => {
+                    const grid = [
+                        [2, 0, 2, 0],
+                        [0, 4, 0, 4],
+                        [8, 0, 0, 8],
+                        [0, 0, 0, 0]
+                    ];
+                    
+                    const result = MoveProcessor.moveLeft(grid);
+                    
+                    const expectedGrid = [
+                        [4, 0, 0, 0],
+                        [8, 0, 0, 0],
+                        [16, 0, 0, 0],
+                        [0, 0, 0, 0]
+                    ];
+                    
+                    testFramework.assertEqual(result.grid, expectedGrid);
+                    testFramework.assertTrue(result.moved);
+                });
+                
+                testFramework.test('canMove - 检查移动能力', () => {
+                    const grid = [
+                        [2, 0, 2, 0],
+                        [0, 4, 0, 4],
+                        [8, 0, 0, 8],
+                        [0, 0, 0, 0]
+                    ];
+                    
+                    testFramework.assertTrue(MoveProcessor.canMove(grid, 'left'));
+                    testFramework.assertTrue(MoveProcessor.canMoveAnyDirection(grid));
+                });
+                
+                testFramework.run();
+            } catch (error) {
+                console.error('测试执行出错:', error);
+            } finally {
+                restore();
+            }
+        }
+
+        // 运行GameEngine测试
+        function runGameEngineTests() {
+            const restore = redirectConsole('gameengine-output');
+
+            try {
+                // 重新创建测试实例并运行
+                const testFramework = new TestFramework();
+
+                // 重新定义关键测试（简化版）
+                testFramework.test('GameEngine构造函数 - 正常初始化', () => {
+                    const gameState = new GameState();
+                    const gameEngine = new GameEngine(gameState);
+
+                    testFramework.assertNotNull(gameEngine);
+                    testFramework.assertEqual(gameEngine.getVersion(), '1.0.0');
+                });
+
+                testFramework.test('initGame - 正常初始化', () => {
+                    const gameState = new GameState();
+                    const gameEngine = new GameEngine(gameState);
+
+                    gameEngine.initGame();
+
+                    testFramework.assertTrue(gameState.isGameStarted());
+                    testFramework.assertFalse(gameState.isGameOver());
+                    testFramework.assertFalse(gameState.hasWon());
+                    testFramework.assertEqual(gameState.getScore(), 0);
+
+                    // 应该有2个初始方块
+                    const emptyTiles = gameState.getEmptyTiles();
+                    testFramework.assertEqual(emptyTiles.length, 14); // 16 - 2 = 14
+                });
+
+                testFramework.test('move - 有效移动', () => {
+                    const gameState = new GameState();
+                    const gameEngine = new GameEngine(gameState);
+
+                    // 设置测试网格
+                    const testGrid = [
+                        [2, 0, 2, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0]
+                    ];
+                    gameState.setGrid(testGrid);
+                    gameState.setGameStarted(true);
+
+                    const result = gameEngine.move('left');
+
+                    testFramework.assertTrue(result);
+                    testFramework.assertTrue(gameState.wasLastMoveValid());
+                });
+
+                testFramework.test('checkGameStatus - 游戏获胜', () => {
+                    const gameState = new GameState();
+                    const gameEngine = new GameEngine(gameState);
+
+                    const testGrid = [
+                        [2048, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0]
+                    ];
+                    gameState.setGrid(testGrid);
+
+                    const status = gameEngine.checkGameStatus();
+
+                    testFramework.assertEqual(status, 'won');
+                    testFramework.assertTrue(gameState.hasWon());
+                });
+
+                testFramework.test('getGameStats - 获取统计信息', () => {
+                    const gameState = new GameState();
+                    const gameEngine = new GameEngine(gameState);
+
+                    gameState.setScore(100);
+                    gameState.setBestScore(200);
+
+                    const testGrid = [
+                        [2, 4, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0]
+                    ];
+                    gameState.setGrid(testGrid);
+
+                    const stats = gameEngine.getGameStats();
+
+                    testFramework.assertNotNull(stats);
+                    testFramework.assertEqual(stats.score, 100);
+                    testFramework.assertEqual(stats.bestScore, 200);
+                    testFramework.assertEqual(stats.maxTile, 4);
+                });
+
+                testFramework.run();
+            } catch (error) {
+                console.error('测试执行出错:', error);
+            } finally {
+                restore();
+            }
+        }
+
+        // 演示算法
+        function demonstrateAlgorithm() {
+            const restore = redirectConsole('demo-output');
+            
+            try {
+                console.log('🎮 算法演示开始...\n');
+                
+                const testGrid = [
+                    [2, 0, 2, 4],
+                    [0, 4, 0, 4],
+                    [8, 0, 8, 0],
+                    [0, 2, 0, 2]
+                ];
+                
+                console.log('初始网格:');
+                MoveProcessor.printGrid(testGrid, '原始状态');
+                
+                // 演示四个方向的移动
+                const directions = ['left', 'right', 'up', 'down'];
+                
+                for (const direction of directions) {
+                    let result;
+                    switch (direction) {
+                        case 'left':
+                            result = MoveProcessor.moveLeft(testGrid);
+                            break;
+                        case 'right':
+                            result = MoveProcessor.moveRight(testGrid);
+                            break;
+                        case 'up':
+                            result = MoveProcessor.moveUp(testGrid);
+                            break;
+                        case 'down':
+                            result = MoveProcessor.moveDown(testGrid);
+                            break;
+                    }
+                    
+                    console.log(`向${direction}移动:`);
+                    console.log(`分数: ${result.score}, 是否移动: ${result.moved}`);
+                    MoveProcessor.printGrid(result.grid, `${direction}移动后`);
+                }
+                
+                console.log('🎉 算法演示完成！');
+            } catch (error) {
+                console.error('演示执行出错:', error);
+            } finally {
+                restore();
+            }
+        }
+        
+        // 性能测试
+        function runPerformanceTests() {
+            const restore = redirectConsole('performance-output');
+            
+            try {
+                console.log('⚡ 性能测试开始...\n');
+                
+                // 创建随机网格
+                function createRandomGrid() {
+                    const grid = [];
+                    const values = [0, 0, 0, 0, 2, 2, 4, 8, 16, 32];
+                    
+                    for (let row = 0; row < 4; row++) {
+                        grid[row] = [];
+                        for (let col = 0; col < 4; col++) {
+                            grid[row][col] = values[Math.floor(Math.random() * values.length)];
+                        }
+                    }
+                    return grid;
+                }
+                
+                const iterations = 10000;
+                const testGrid = createRandomGrid();
+                
+                console.log(`测试网格 (${iterations} 次迭代):`);
+                MoveProcessor.printGrid(testGrid);
+                
+                // 测试各个方向的性能
+                const directions = ['left', 'right', 'up', 'down'];
+                
+                for (const direction of directions) {
+                    const startTime = performance.now();
+                    
+                    for (let i = 0; i < iterations; i++) {
+                        switch (direction) {
+                            case 'left':
+                                MoveProcessor.moveLeft(testGrid);
+                                break;
+                            case 'right':
+                                MoveProcessor.moveRight(testGrid);
+                                break;
+                            case 'up':
+                                MoveProcessor.moveUp(testGrid);
+                                break;
+                            case 'down':
+                                MoveProcessor.moveDown(testGrid);
+                                break;
+                        }
+                    }
+                    
+                    const endTime = performance.now();
+                    const duration = endTime - startTime;
+                    const avgTime = duration / iterations;
+                    
+                    console.log(`${direction}移动: ${duration.toFixed(2)}ms 总计, ${avgTime.toFixed(4)}ms 平均`);
+                }
+                
+                console.log('\n🚀 性能测试完成！');
+            } catch (error) {
+                console.error('性能测试出错:', error);
+            } finally {
+                restore();
+            }
+        }
+    </script>
+</body>
+</html>

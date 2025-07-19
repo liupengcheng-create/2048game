@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048游戏 - 渲染器演示</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .demo-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-button {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .demo-button:hover {
+            background: #9f8a76;
+        }
+        
+        .demo-info {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>2048游戏 - 渲染器演示</h1>
+        
+        <div class="demo-section">
+            <h2>游戏界面</h2>
+            <div class="game-container">
+                <!-- 游戏标题和分数区域 -->
+                <header class="game-header">
+                    <h1 class="game-title">2048</h1>
+                    <div class="score-container">
+                        <div class="score-box">
+                            <div class="score-label">分数</div>
+                            <div class="score-value" id="current-score">0</div>
+                        </div>
+                        <div class="score-box">
+                            <div class="score-label">最高分</div>
+                            <div class="score-value" id="best-score">0</div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- 游戏网格容器 -->
+                <div class="grid-container">
+                    <!-- 背景网格 -->
+                    <div class="grid-background">
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                    </div>
+                    
+                    <!-- 游戏方块容器 -->
+                    <div class="tile-container" id="tile-container">
+                        <!-- 动态生成的方块将在这里显示 -->
+                    </div>
+                </div>
+
+                <!-- 游戏状态消息 -->
+                <div class="game-message" id="game-message">
+                    <div class="message-content">
+                        <div class="message-text" id="message-text"></div>
+                        <button class="try-again-button" id="try-again-btn">再试一次</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>渲染器控制</h2>
+            <div class="demo-controls">
+                <button class="demo-button" onclick="initDemo()">初始化演示</button>
+                <button class="demo-button" onclick="showSampleGrid()">显示示例网格</button>
+                <button class="demo-button" onclick="testAnimations()">测试动画</button>
+                <button class="demo-button" onclick="showWinMessage()">显示获胜消息</button>
+                <button class="demo-button" onclick="showGameOverMessage()">显示游戏结束</button>
+                <button class="demo-button" onclick="clearGrid()">清空网格</button>
+            </div>
+            <div id="demo-info" class="demo-info">点击按钮开始演示...</div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="js/GameState.js"></script>
+    <script src="js/MoveProcessor.js"></script>
+    <script src="js/GameEngine.js"></script>
+    <script src="js/GameRenderer.js"></script>
+    
+    <script>
+        let demoGameState = null;
+        let demoGameEngine = null;
+        let demoGameRenderer = null;
+        
+        // 初始化演示
+        function initDemo() {
+            try {
+                updateInfo('正在初始化演示...');
+                
+                // 创建游戏组件
+                demoGameState = new GameState();
+                demoGameEngine = new GameEngine(demoGameState);
+                
+                const gameContainer = document.querySelector('.game-container');
+                demoGameRenderer = new GameRenderer(gameContainer);
+                
+                // 初始化游戏
+                demoGameEngine.initGame();
+                demoGameRenderer.render(demoGameState);
+                
+                updateInfo('演示初始化完成！游戏已开始，包含2个随机方块。');
+            } catch (error) {
+                updateInfo('初始化失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 显示示例网格
+        function showSampleGrid() {
+            try {
+                if (!demoGameState || !demoGameRenderer) {
+                    updateInfo('请先初始化演示！');
+                    return;
+                }
+                
+                updateInfo('显示示例网格...');
+                
+                // 设置示例网格
+                const sampleGrid = [
+                    [2, 4, 8, 16],
+                    [32, 64, 128, 256],
+                    [512, 1024, 2048, 0],
+                    [0, 0, 0, 4096]
+                ];
+                
+                demoGameState.setGrid(sampleGrid);
+                demoGameState.setScore(12345);
+                demoGameState.setBestScore(54321);
+                
+                demoGameRenderer.render(demoGameState);
+                
+                updateInfo('示例网格已显示！包含从2到4096的各种方块。');
+            } catch (error) {
+                updateInfo('显示示例网格失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 测试动画
+        function testAnimations() {
+            try {
+                if (!demoGameRenderer) {
+                    updateInfo('请先初始化演示！');
+                    return;
+                }
+                
+                updateInfo('测试动画效果...');
+                
+                // 测试新方块动画
+                demoGameRenderer.animateNewTile(0, 0, 2).then(() => {
+                    return demoGameRenderer.animateNewTile(1, 1, 4);
+                }).then(() => {
+                    return demoGameRenderer.animateMerge({row: 0, col: 0}, 4);
+                }).then(() => {
+                    updateInfo('动画测试完成！展示了新方块出现和合并动画。');
+                });
+                
+            } catch (error) {
+                updateInfo('动画测试失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 显示获胜消息
+        function showWinMessage() {
+            try {
+                if (!demoGameRenderer) {
+                    updateInfo('请先初始化演示！');
+                    return;
+                }
+                
+                demoGameRenderer.showMessage('🎉 恭喜！你达到了2048！\n点击"继续游戏"可以继续挑战更高分数。');
+                updateInfo('显示获胜消息');
+            } catch (error) {
+                updateInfo('显示获胜消息失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 显示游戏结束消息
+        function showGameOverMessage() {
+            try {
+                if (!demoGameRenderer) {
+                    updateInfo('请先初始化演示！');
+                    return;
+                }
+                
+                demoGameRenderer.showMessage('💀 游戏结束！\n最终分数：12345');
+                updateInfo('显示游戏结束消息');
+            } catch (error) {
+                updateInfo('显示游戏结束消息失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 清空网格
+        function clearGrid() {
+            try {
+                if (!demoGameRenderer) {
+                    updateInfo('请先初始化演示！');
+                    return;
+                }
+                
+                demoGameRenderer.clearAllTiles();
+                demoGameRenderer.hideMessage();
+                updateInfo('网格已清空');
+            } catch (error) {
+                updateInfo('清空网格失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 更新信息显示
+        function updateInfo(message) {
+            const infoElement = document.getElementById('demo-info');
+            if (infoElement) {
+                infoElement.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            }
+        }
+        
+        // 页面加载完成后自动初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateInfo('页面加载完成，点击"初始化演示"开始。');
+        });
+    </script>
+</body>
+</html>

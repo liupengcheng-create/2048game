@@ -1,0 +1,21 @@
+{
+  "editor": {
+    "fontSize": 14,
+    "fontFamily": "Consolas, 'Courier New', monospace",
+    "tabSize": 2,
+    "insertSpaces": true,
+    "wordWrap": "on",
+    "lineNumbers": "on",
+    "minimap": {
+      "enabled": true
+    }
+  },
+  "workbench": {
+    "colorTheme": "Dark+ (default dark)",
+    "iconTheme": "vs-seti"
+  },
+  "files": {
+    "autoSave": "afterDelay",
+    "autoSaveDelay": 1000
+  }
+}

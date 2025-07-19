@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048游戏 - 集成测试</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .test-button {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .test-button:hover {
+            background: #9f8a76;
+        }
+        
+        .test-button.success {
+            background: #27ae60;
+        }
+        
+        .test-button.danger {
+            background: #e74c3c;
+        }
+        
+        .test-output {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .game-display {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .game-area {
+            flex: 1;
+        }
+        
+        .info-panel {
+            flex: 1;
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .info-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            background: white;
+            border-radius: 3px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-ok {
+            background: #27ae60;
+        }
+        
+        .status-error {
+            background: #e74c3c;
+        }
+        
+        .status-warning {
+            background: #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>2048游戏 - 集成测试</h1>
+        
+        <div class="test-section">
+            <h2>系统状态</h2>
+            <div id="system-status">
+                <!-- 系统状态将在这里显示 -->
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏演示</h2>
+            <div class="game-display">
+                <div class="game-area">
+                    <div class="game-container">
+                        <!-- 游戏标题和分数区域 -->
+                        <header class="game-header">
+                            <h1 class="game-title">2048</h1>
+                            <div class="score-container">
+                                <div class="score-box">
+                                    <div class="score-label">分数</div>
+                                    <div class="score-value" id="current-score">0</div>
+                                </div>
+                                <div class="score-box">
+                                    <div class="score-label">最高分</div>
+                                    <div class="score-value" id="best-score">0</div>
+                                </div>
+                            </div>
+                        </header>
+
+                        <!-- 游戏网格容器 -->
+                        <div class="grid-container">
+                            <!-- 背景网格 -->
+                            <div class="grid-background">
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                            </div>
+                            
+                            <!-- 游戏方块容器 -->
+                            <div class="tile-container" id="tile-container">
+                                <!-- 动态生成的方块将在这里显示 -->
+                            </div>
+                        </div>
+
+                        <!-- 游戏状态消息 -->
+                        <div class="game-message" id="game-message">
+                            <div class="message-content">
+                                <div class="message-text" id="message-text"></div>
+                                <button class="try-again-button" id="try-again-btn">再试一次</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>游戏信息</h3>
+                    <div id="game-info">
+                        <!-- 游戏信息将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试控制</h2>
+            <div class="test-controls">
+                <button class="test-button" onclick="initializeGame()">初始化游戏</button>
+                <button class="test-button" onclick="testMovement()">测试移动</button>
+                <button class="test-button" onclick="testGameFlow()">测试游戏流程</button>
+                <button class="test-button" onclick="simulateGame()">模拟游戏</button>
+                <button class="test-button" onclick="testStorage()">测试存储</button>
+                <button class="test-button success" onclick="runAllTests()">运行所有测试</button>
+                <button class="test-button danger" onclick="resetGame()">重置游戏</button>
+            </div>
+            <div id="test-output" class="test-output">点击按钮开始测试...</div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="js/GameState.js"></script>
+    <script src="js/MoveProcessor.js"></script>
+    <script src="js/GameEngine.js"></script>
+    <script src="js/GameRenderer.js"></script>
+    <script src="js/EventHandler.js"></script>
+    <script src="js/ScoreManager.js"></script>
+    
+    <script>
+        // 游戏组件实例
+        let gameState = null;
+        let gameEngine = null;
+        let gameRenderer = null;
+        let eventHandler = null;
+        let scoreManager = null;
+        
+        // 测试输出元素
+        let testOutput = null;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            testOutput = document.getElementById('test-output');
+            updateSystemStatus();
+            log('集成测试页面加载完成');
+        });
+        
+        // 日志输出函数
+        function log(message) {
+            if (testOutput) {
+                const timestamp = new Date().toLocaleTimeString();
+                testOutput.textContent += `[${timestamp}] ${message}\n`;
+                testOutput.scrollTop = testOutput.scrollHeight;
+            }
+            console.log(message);
+        }
+        
+        // 清空日志
+        function clearLog() {
+            if (testOutput) {
+                testOutput.textContent = '';
+            }
+        }
+        
+        // 更新系统状态
+        function updateSystemStatus() {
+            const statusContainer = document.getElementById('system-status');
+            if (!statusContainer) return;
+            
+            const components = [
+                { name: 'GameState', instance: gameState, class: 'GameState' },
+                { name: 'GameEngine', instance: gameEngine, class: 'GameEngine' },
+                { name: 'GameRenderer', instance: gameRenderer, class: 'GameRenderer' },
+                { name: 'EventHandler', instance: eventHandler, class: 'EventHandler' },
+                { name: 'ScoreManager', instance: scoreManager, class: 'ScoreManager' }
+            ];
+            
+            const statusHTML = components.map(comp => {
+                const status = comp.instance ? 'ok' : 'error';
+                const statusText = comp.instance ? '已初始化' : '未初始化';
+                return `
+                    <div class="info-item">
+                        <span class="status-indicator status-${status}"></span>
+                        <strong>${comp.name}:</strong> ${statusText}
+                    </div>
+                `;
+            }).join('');
+            
+            statusContainer.innerHTML = statusHTML;
+        }
+        
+        // 更新游戏信息
+        function updateGameInfo() {
+            const gameInfoContainer = document.getElementById('game-info');
+            if (!gameInfoContainer || !gameState || !scoreManager) return;
+            
+            try {
+                const stats = scoreManager.getStatistics();
+                const gameStats = gameEngine ? gameEngine.getGameStats() : {};
+                
+                const infoHTML = `
+                    <div class="info-item"><strong>当前分数:</strong> ${stats.currentScore}</div>
+                    <div class="info-item"><strong>最高分:</strong> ${stats.bestScore}</div>
+                    <div class="info-item"><strong>空位数量:</strong> ${gameStats.emptyTiles || 0}</div>
+                    <div class="info-item"><strong>最大方块:</strong> ${gameStats.maxTile || 0}</div>
+                    <div class="info-item"><strong>游戏状态:</strong> ${getGameStatusText()}</div>
+                    <div class="info-item"><strong>可移动:</strong> ${gameStats.canMove ? '是' : '否'}</div>
+                `;
+                
+                gameInfoContainer.innerHTML = infoHTML;
+            } catch (error) {
+                gameInfoContainer.innerHTML = '<div class="info-item">获取游戏信息失败</div>';
+            }
+        }
+        
+        // 获取游戏状态文本
+        function getGameStatusText() {
+            if (!gameState) return '未知';
+            
+            if (gameState.isGameOver()) return '游戏结束';
+            if (gameState.hasWon()) return '已获胜';
+            if (gameState.isGameStarted()) return '进行中';
+            return '未开始';
+        }
+        
+        // 初始化游戏
+        function initializeGame() {
+            clearLog();
+            log('开始初始化游戏组件...');
+            
+            try {
+                // 初始化游戏状态
+                gameState = new GameState();
+                log('✓ GameState 初始化完成');
+                
+                // 初始化分数管理器
+                scoreManager = new ScoreManager();
+                log('✓ ScoreManager 初始化完成');
+                
+                // 初始化游戏引擎
+                gameEngine = new GameEngine(gameState, scoreManager);
+                log('✓ GameEngine 初始化完成');
+                
+                // 初始化游戏渲染器
+                const gameContainer = document.querySelector('.game-container');
+                gameRenderer = new GameRenderer(gameContainer);
+                log('✓ GameRenderer 初始化完成');
+                
+                // 初始化事件处理器
+                eventHandler = new EventHandler(gameEngine, gameRenderer);
+                eventHandler.init();
+                log('✓ EventHandler 初始化完成');
+                
+                // 初始化游戏
+                gameEngine.initGame();
+                log('✓ 游戏初始化完成');
+                
+                // 渲染初始界面
+                gameRenderer.render(gameState);
+                log('✓ 界面渲染完成');
+                
+                // 更新状态显示
+                updateSystemStatus();
+                updateGameInfo();
+                
+                log('🎉 游戏初始化成功！');
+                
+            } catch (error) {
+                log('❌ 游戏初始化失败: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 测试移动功能
+        function testMovement() {
+            if (!gameEngine || !gameRenderer) {
+                log('❌ 请先初始化游戏');
+                return;
+            }
+            
+            log('开始测试移动功能...');
+            
+            const directions = ['left', 'right', 'up', 'down'];
+            let testIndex = 0;
+            
+            function testNextMove() {
+                if (testIndex >= directions.length) {
+                    log('✓ 移动测试完成');
+                    updateGameInfo();
+                    return;
+                }
+                
+                const direction = directions[testIndex];
+                log(`测试向${direction}移动...`);
+                
+                const success = gameEngine.move(direction);
+                log(`向${direction}移动${success ? '成功' : '失败'}`);
+                
+                gameRenderer.render(gameState);
+                testIndex++;
+                
+                setTimeout(testNextMove, 1000);
+            }
+            
+            testNextMove();
+        }
+        
+        // 测试游戏流程
+        function testGameFlow() {
+            if (!gameEngine || !gameRenderer) {
+                log('❌ 请先初始化游戏');
+                return;
+            }
+            
+            log('开始测试游戏流程...');
+            
+            // 测试重新开始
+            log('测试重新开始功能...');
+            gameEngine.restart();
+            gameRenderer.render(gameState);
+            log('✓ 重新开始测试完成');
+            
+            // 测试游戏统计
+            log('测试游戏统计功能...');
+            const stats = gameEngine.getGameStats();
+            log(`游戏统计: ${JSON.stringify(stats, null, 2)}`);
+            log('✓ 游戏统计测试完成');
+            
+            updateGameInfo();
+        }
+        
+        // 模拟游戏
+        function simulateGame() {
+            if (!gameEngine || !gameRenderer) {
+                log('❌ 请先初始化游戏');
+                return;
+            }
+            
+            log('开始模拟游戏...');
+            
+            let moveCount = 0;
+            const maxMoves = 20;
+            
+            function simulateMove() {
+                if (moveCount >= maxMoves || gameState.isGameOver()) {
+                    log(`模拟游戏结束，共进行${moveCount}次移动`);
+                    log(`最终分数: ${gameState.getScore()}`);
+                    updateGameInfo();
+                    return;
+                }
+                
+                const possibleMoves = gameEngine.getPossibleMoves();
+                if (possibleMoves.length === 0) {
+                    log('无可用移动，游戏结束');
+                    return;
+                }
+                
+                const randomDirection = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                const success = gameEngine.move(randomDirection);
+                
+                if (success) {
+                    moveCount++;
+                    log(`第${moveCount}步: 向${randomDirection}移动，分数: ${gameState.getScore()}`);
+                    gameRenderer.render(gameState);
+                    
+                    setTimeout(simulateMove, 500);
+                } else {
+                    log('移动失败，结束模拟');
+                }
+            }
+            
+            simulateMove();
+        }
+        
+        // 测试存储功能
+        function testStorage() {
+            if (!scoreManager) {
+                log('❌ 请先初始化游戏');
+                return;
+            }
+            
+            log('开始测试存储功能...');
+            
+            try {
+                // 测试存储可用性
+                const storageAvailable = scoreManager.isStorageAvailable();
+                log(`本地存储可用性: ${storageAvailable ? '可用' : '不可用'}`);
+                
+                // 测试数据保存和加载
+                scoreManager.saveToStorage();
+                log('✓ 数据保存测试完成');
+                
+                scoreManager.loadFromStorage();
+                log('✓ 数据加载测试完成');
+                
+                // 测试统计信息
+                const stats = scoreManager.getStatistics();
+                log(`统计信息: ${JSON.stringify(stats, null, 2)}`);
+                
+                log('✓ 存储功能测试完成');
+                
+            } catch (error) {
+                log('❌ 存储功能测试失败: ' + error.message);
+            }
+        }
+        
+        // 运行所有测试
+        function runAllTests() {
+            clearLog();
+            log('开始运行完整集成测试...');
+            
+            // 按顺序执行测试
+            initializeGame();
+            
+            setTimeout(() => {
+                testStorage();
+                setTimeout(() => {
+                    testGameFlow();
+                    setTimeout(() => {
+                        log('🎉 所有测试完成！');
+                    }, 2000);
+                }, 2000);
+            }, 2000);
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            if (gameEngine && gameRenderer) {
+                gameEngine.restart();
+                gameRenderer.render(gameState);
+                updateGameInfo();
+                log('游戏已重置');
+            } else {
+                log('❌ 请先初始化游戏');
+            }
+        }
+        
+        // 定期更新游戏信息
+        setInterval(() => {
+            if (gameState && scoreManager) {
+                updateGameInfo();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
